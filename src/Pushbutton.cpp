@@ -5,11 +5,18 @@
 #include "Pushbutton.h"
 
 
-/* Pushbutton() is the object constructor. It intiializes the pushbutton switch inputs and associated state variables
+/* Pushbutton() is the object constructor. It intializes the pushbutton switch inputs and associated state variables. It accepts
+    three parameters:
+      pinNum: Arduino I/O pin number to which the pushbutton is connected
+      actLevel: logic level for putton press (LOW or HIGH)
+      pullup: when true, enables the internal pullup resistor
 */
-pushbutton::pushbutton(uint8_t pinNum) {
-  pinMode(pinNum, INPUT_PULLUP); // configure switch pins as inputs, with pullup (none on board)
+pushbutton::pushbutton(uint8_t pinNum, uint8_t actLevel, bool pullup) {
+  uint8_t pmode;
+  pmode = (pullup? INPUT_PULLUP : INPUT);
+  pinMode(pinNum, pmode); // configure switch pin as input, with or without pullup resistor
   pb.pinNum = pinNum;
+  pb.activeLevel = actLevel;
   pb.state = RDY;
   pb.event = NO_PRESS;
   pb.lockout = false;
@@ -47,7 +54,7 @@ void pushbutton::update() {
       pb.lockout = false;   // end lockout, handle other actions in next call to update()
   }
   else {  // not in debounce lockout period
-    pb.active = (digitalReadFast(pb.pinNum) == 0);  // get current pushbutton state (active = LOW)
+    pb.active = (digitalReadFast(pb.pinNum) == pb.activeLevel);  // get current pushbutton state (active or not)
     switch (pb.state) {   // actions depend on current state
       case RDY:   // waiting for switch press
         if (pb.active) {  // button was pressed

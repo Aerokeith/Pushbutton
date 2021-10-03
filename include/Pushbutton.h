@@ -26,6 +26,7 @@ enum eventEnum {NO_PRESS = 0b000, SINGLE_TAP = 0b001, DOUBLE_TAP = 0b010, LONG_P
 
 struct pushbuttonStruct {
   uint8_t pinNum;       // pin number of pushbutton switch input
+  uint8_t activeLevel;  // logic level for button press (HIGH or LOW)
   stateEnum state;  // current state of the switch (see swStateEnum)
   eventEnum event;  // last switch event detected
   elapsedMillis delayTimer;   // timer used for double-tap and longpress delays
@@ -43,7 +44,7 @@ struct pushbuttonStruct {
 class pushbutton {
   pushbuttonStruct pb;
 public:
-  pushbutton(uint8_t pinNum);
+  pushbutton(uint8_t pinNum, uint8_t actLevel, bool pullup);
   void enableEvents(int eventSel);
   void setDelays(int dbPeriod, int doubleDly, int longDur);
   void update();
