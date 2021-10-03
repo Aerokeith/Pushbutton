@@ -1,4 +1,46 @@
-/* PUSHBUTTON.CPP - Functions used to monitor the pushbutton switches used for script triggering (see Trigger.cpp) and other functions.
+/* PUSHBUTTON - THis library contains functions to detect "events" associated with an SPST-NO momentary-action pushbutton switch.
+
+    pushbutton pb(pinNum, actLevel, pullup);
+      Create a pushbutton object for a single switch, with the following parameters:
+        pinNum: Arduino I/O pin number to which the pushbutton is connected
+        actLevel: logic level for button press (LOW or HIGH)
+        pullup: when true, enables the internal pullup resistor
+
+    pb.enableEvents(eventSel);
+      Used to enable the optional "double-tap" and/or "long-press" switch events. The "single-tap" event is always enabled.
+      The optional events are specified using the following bit field parameter:
+        eventSel: (DOUBLE_TAP) or (LONG_PRESS) or (DOUBLE_TAP | LONG_PRESS)
+
+    pb.setDelays(dbPeriod, doubleDly, longDur);
+      Used to override the default timing values used for swtch debouncing and event detection. 0 values are ignored and the 
+      corresponding default is not changed. 
+        dbPeriod: Pushbutton switch debounce lockout period (ms)
+        doubleDly: Max delay between first and second press (ms)
+        longDur: Min duration of long press (ms)
+
+    pb.update();
+      This function should must called periodically to monitor the pushbutton switch and detect one of the possible events
+      defined by eventEnum (in Pushbutton.h). The interval between calls should be less than the debounce period (100ms nominal).
+
+    pb.singleTap();
+      Returns true if the periodically-called pb.update() function has detected a single-tap event. A true value is returned only 
+      once for each event.
+
+    pb.doubleTap();
+      Returns true if the periodically-called pb.update() function has detected a double-tap event. A true value is returned only 
+      once for each event. By default, the maximum interval between successive button presses (taps) is 300ms.
+
+    pb.longPress();
+      Returns true if the periodically-called pb.update() function has detected a long-press event. A true value is returned only 
+      once for each event. By default, a long-press event is detected when the putton is depressed for at least 1000ms. 
+
+    pb.eventDetected();
+      Returns true if the periodically-called pb.update() function has detected any type of putton-press event, and the event has not 
+      been cleared by a call to singleTap(), doubleTap(), longPress(), or getEvent(). This call does not clear the event.
+
+    pb.getEvent();
+      Returns one of the following state values: NO_PRESS, SINGLE_TAP, DOUBLE_TAP, or LONG_PRESS. The event is cleared and subsequent 
+      calls will return NO_PRESS until a new event is detected.
 */
 
 #include <Arduino.h>
@@ -25,7 +67,7 @@ pushbutton::pushbutton(uint8_t pinNum, uint8_t actLevel, bool pullup) {
 }
 
 
-/* enableEvent() is called to enable the double-tap and/or long-press functionality of the pushbutton switch
+/* enableEvents() is called to enable the double-tap and/or long-press functionality of the pushbutton switch
 */
 void pushbutton::enableEvents(int eventSel) {
   pb.doubleTapEnabled = (eventSel & DOUBLE_TAP);
@@ -35,7 +77,7 @@ void pushbutton::enableEvents(int eventSel) {
 
 /* setDelays() can be called to override the default timing values. 0 values are ignored and the corresponding default is not changed.
 */
-void pushbutton::setDelays(int dbPeriod, int doubleDly, int longDur) {
+void pushbutton::setDelays(uint16_t dbPeriod, uint16_t doubleDly, uint16_t longDur) {
   if (dbPeriod > 0)
     pb.debouncePeriod = dbPeriod;
   if (doubleDly > 0)
@@ -45,8 +87,8 @@ void pushbutton::setDelays(int dbPeriod, int doubleDly, int longDur) {
 }
 
 
-/* update() is called from the main loop() to monitor a pushbutton switch and detect one of the possible events
-    defined by eventEnum (in Pushbutton.h).
+/* update() is called periodically to monitor a pushbutton switch and detect one of the possible events
+    defined by eventEnum (in Pushbutton.h). The interval between calls should be less than the debounce period (100ms nominal)
 */
 void pushbutton::update() {
   if (pb.lockout) {   // if pushbutton is currently in debounce lockout period

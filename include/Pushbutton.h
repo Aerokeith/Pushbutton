@@ -46,7 +46,7 @@ class pushbutton {
 public:
   pushbutton(uint8_t pinNum, uint8_t actLevel, bool pullup);
   void enableEvents(int eventSel);
-  void setDelays(int dbPeriod, int doubleDly, int longDur);
+  void setDelays(uint16_t dbPeriod, uint16_t doubleDly, uint16_t longDur);
   void update();
   bool singleTap();
   bool doubleTap();
