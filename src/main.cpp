@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "Pushbutton.h"
 
-pushbutton psb(3, LOW, false);
+pushbutton psb(18, LOW, false);
 char msg[80];
 
 

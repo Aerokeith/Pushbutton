@@ -9,12 +9,13 @@ using namespace std;
 #define LONGPRESS_DURATION 1000      // min duration of long press (ms)
 
   /* Pushbutton switch states:
+      UNINIT: Switch hasn't yet been initialized
       RDY: Waiting for new button press
       WAIT_LONG: Button pressed, waiting for long-press duration or for button to go inactive before possible 2nd tap
       WAIT_DOUBLE: Button released, waiting for possible 2nd tap 
       WAIT_INACTIVE: Waiting for button to be released before returning to RDY state
   */
-enum stateEnum {RDY, WAIT_LONG, WAIT_DOUBLE, WAIT_INACTIVE};
+enum stateEnum {UNINIT, RDY, WAIT_LONG, WAIT_DOUBLE, WAIT_INACTIVE};
 
   /* Pushbutton switch events:
       NONE: No event yet, or previous event was read/cleared
@@ -27,6 +28,7 @@ enum eventEnum {NO_PRESS = 0b000, SINGLE_TAP = 0b001, DOUBLE_TAP = 0b010, LONG_P
 struct pushbuttonStruct {
   uint8_t pinNum;       // pin number of pushbutton switch input
   uint8_t activeLevel;  // logic level for button press (HIGH or LOW)
+  bool enablePullup;    // true if internal pullup should be enabled
   stateEnum state;  // current state of the switch (see swStateEnum)
   eventEnum event;  // last switch event detected
   elapsedMillis delayTimer;   // timer used for double-tap and longpress delays

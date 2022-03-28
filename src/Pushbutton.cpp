@@ -54,12 +54,10 @@
       pullup: when true, enables the internal pullup resistor
 */
 pushbutton::pushbutton(uint8_t pinNum, uint8_t actLevel, bool pullup) {
-  uint8_t pmode;
-  pmode = (pullup? INPUT_PULLUP : INPUT);
-  pinMode(pinNum, pmode); // configure switch pin as input, with or without pullup resistor
+  pb.enablePullup = pullup;
   pb.pinNum = pinNum;
   pb.activeLevel = actLevel;
-  pb.state = RDY;
+  pb.state = UNINIT;    // switch remains uninitialized until first call to update()
   pb.event = NO_PRESS;
   pb.lockout = false;
   pb.doubleTapEnabled = false;
@@ -91,6 +89,10 @@ void pushbutton::setDelays(uint16_t dbPeriod, uint16_t doubleDly, uint16_t longD
     defined by eventEnum (in Pushbutton.h). The interval between calls should be less than the debounce period (100ms nominal)
 */
 void pushbutton::update() {
+  if (pb.state == UNINIT) {   // if this is the first call to update()
+    pinMode(pb.pinNum, (pb.enablePullup? INPUT_PULLUP: INPUT)); // configure the input pin
+    pb.state = RDY; // now ready to read pin
+  }
   if (pb.lockout) {   // if pushbutton is currently in debounce lockout period
     if (pb.lockoutTimer > pb.debouncePeriod)  // if debounce period expired
       pb.lockout = false;   // end lockout, handle other actions in next call to update()
