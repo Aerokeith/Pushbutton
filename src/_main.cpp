@@ -1,19 +1,23 @@
+
 #include <Arduino.h>
 #include "Pushbutton.h"
 
-pushbutton psb(18, LOW, false);
+pushButtonClass psb;
 char msg[80];
 
 
 void setup() {
+  /*  
   Serial.begin(115200);
   delay(3000);
-  psb.enableEvents(DOUBLE_TAP | LONG_PRESS);
+  psb.init(18, LOW, false, (SINGLE_TAP | DOUBLE_TAP | LONG_PRESS));
   //psb.enableEvents(0);
   //psb.setDelays(10, 0, 0);
+  */
 }
 
 void loop() {
+  /*
   psb.update();
   if (psb.eventDetected()) {
     switch (psb.getEvent()) {
@@ -31,4 +35,5 @@ void loop() {
       break;
     }
   }
+  */
 }

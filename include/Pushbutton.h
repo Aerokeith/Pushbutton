@@ -1,53 +1,44 @@
 #include <Arduino.h>
 #include <elapsedMillis.h>
 
-using namespace std;
-
   // Default delay values; can be changed with setDelays()
-#define DEBOUNCE_PERIOD 80        // pushbutton switch debounce lockout period (ms)
-#define DOUBLETAP_DELAY 300       // max delay between first and second press (ms)
-#define LONGPRESS_DURATION 1000      // min duration of long press (ms)
+const uint16_t defDebouncePeriod = 80;   // default switch debounce period (ms)
+const uint16_t defDoubleTapDelay = 300;   // default max delay between first and second press (ms)
+const uint16_t defLongPressDur = 1000;    // default min duration of long press (ms)
 
   /* Pushbutton switch states:
-      UNINIT: Switch hasn't yet been initialized
       RDY: Waiting for new button press
       WAIT_LONG: Button pressed, waiting for long-press duration or for button to go inactive before possible 2nd tap
       WAIT_DOUBLE: Button released, waiting for possible 2nd tap 
       WAIT_INACTIVE: Waiting for button to be released before returning to RDY state
   */
-enum stateEnum {UNINIT, RDY, WAIT_LONG, WAIT_DOUBLE, WAIT_INACTIVE};
+enum stateEnum {RDY, WAIT_LONG, WAIT_DOUBLE, WAIT_INACTIVE};
 
   /* Pushbutton switch events:
-      NONE: No event yet, or previous event was read/cleared
+      NO_PRESS: No event yet, or previous event was read/cleared
       SINGLE_TAP: Button was pressed once and released
       DOUBLE_TAP:  Button was pressed twice with required timing
       LONG_PRESS: Button was pressed once and held for required duration
   */
 enum eventEnum {NO_PRESS = 0b000, SINGLE_TAP = 0b001, DOUBLE_TAP = 0b010, LONG_PRESS = 0b100};
 
-struct pushbuttonStruct {
-  uint8_t pinNum;       // pin number of pushbutton switch input
+
+class pushButtonClass {
   uint8_t activeLevel;  // logic level for button press (HIGH or LOW)
-  bool enablePullup;    // true if internal pullup should be enabled
-  stateEnum state;  // current state of the switch (see swStateEnum)
-  eventEnum event;  // last switch event detected
+  stateEnum state;      // current state of the switch (see swStateEnum)
+  eventEnum event;      // last switch event detected
   elapsedMillis delayTimer;   // timer used for double-tap and longpress delays
   elapsedMillis lockoutTimer; // timer used for pushbitton switch debouncing
-  uint16_t debouncePeriod = DEBOUNCE_PERIOD; // pushbutton switch debounce lockout period (ms)
-  uint16_t doubleTapDelay = DOUBLETAP_DELAY; // max delay between first and second press (ms)
-  uint16_t longPressDuration = LONGPRESS_DURATION; // min duration of long press (ms)
-  bool active;  // current (debounced) level of the switch
+  uint16_t debouncePeriod = defDebouncePeriod; // pushbutton switch debounce lockout period (ms)
+  uint16_t doubleTapDelay = defDoubleTapDelay; // max delay between first and second press (ms)
+  uint16_t longPressDuration = defLongPressDur; // min duration of long press (ms)
+  bool buttonActive;  // current (debounced) level of the switch
   bool lockout; // true when switch is in debounce lockout period
   bool doubleTapEnabled;  // true if double-tap function has been enabled
   bool longPressEnabled;  // true when long-press function has been enabled
-};
-
-
-class pushbutton {
-  pushbuttonStruct pb;
 public:
-  pushbutton(uint8_t pinNum, uint8_t actLevel, bool pullup);
-  void enableEvents(int eventSel);
+  uint8_t pNum;       // pin number of pushbutton switch input
+  void init(uint8_t ioPinNum, uint8_t actLevel, bool pullup, int eventSel);
   void setDelays(uint16_t dbPeriod, uint16_t doubleDly, uint16_t longDur);
   void update();
   bool singleTap();
