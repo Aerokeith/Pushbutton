@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <elapsedMillis.h>
 
+#ifndef _PB_TYPES
+#define _PB_TYPES
+
   // Default delay values; can be changed with setDelays()
 const uint16_t defDebouncePeriod = 80;   // default switch debounce period (ms)
 const uint16_t defDoubleTapDelay = 300;   // default max delay between first and second press (ms)
@@ -47,3 +50,5 @@ public:
   bool eventDetected();
   eventEnum getEvent();
 };
+
+#endif
